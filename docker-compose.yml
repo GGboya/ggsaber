@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # 主应用服务
+  go-saber:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=go_saber
+      - DB_USER=postgres
+      - DB_PASSWORD=your_password_here
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=
+      - SERVER_PORT=8080
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs:/root/logs
+    restart: unless-stopped
+    networks:
+      - saber-network
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=go_saber
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your_password_here
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - saber-network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - saber-network
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - go-saber
+    restart: unless-stopped
+    networks:
+      - saber-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  saber-network:
+    driver: bridge 

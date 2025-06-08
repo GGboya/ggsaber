@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 开发文件
+.env
+*.log
+logs/
+backup/
+ssl/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 编译产物
+go-saber-system
+main
+
+# 测试文件
+*_test.go
+test/
+
+# 临时文件
+tmp/
+temp/ 
